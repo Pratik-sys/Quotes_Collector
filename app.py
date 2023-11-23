@@ -1,5 +1,5 @@
-import os
-from flask import Flask
+import os, json
+from flask import Flask, request
 from flask_restx import Api, Resource
 from mongoengine import connect
 from dotenv import load_dotenv
@@ -21,14 +21,22 @@ class TestAPI(Resource):
         return {"msg": "Testing API"}
 
 
-@api.route("/dump")
-class Dumpdata(Resource):
+@api.route("/AddQ")
+class AddQuotes(Resource):
     """This API just for testing purpose"""
 
     def post(self):
-        """Get req to check whether api returns the defined response"""
-        Quotes(title="test2", author="testauthor2").save()
-        return {"msg": "dumped"}
+        """Post req to add in DB"""
+        record = json.loads(request.data)
+        try:
+            if len(record) != 0:
+                quote = Quotes(title=record["title"], author=record["author"])
+                quote.save()
+                return {"msg":"data is dumped"}
+            else:
+                return {"msg": "Fields are empty"}
+        except:
+            return {"msg": "something is wrong"}
 
 
 if __name__ == "__main__":
