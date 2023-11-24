@@ -40,6 +40,19 @@ class UpdateQuotes(Resource):
         except Exception as ex:
             return jsonify({"Msg": ex})
 
+@api.route("/<string:qid>/DelQ")
+class UpdateQuotes(Resource):
+    def delete(self, qid: str):
+        """PUT req to update any records in database or particular objectID"""
+        try:
+            q = Quotes.objects(id=qid).first()
+            if q is not None:
+                q.delete()
+                return jsonify({"Msg": f'Quote with {qid} deleted'})
+            else:
+                return jsonify({"Msg": f'No quote with {qid} to delete'})
+        except Exception as ex:
+            return jsonify({"Msg": ex})
 
 if __name__ == "__main__":
     app.run(port=8080, debug=True)
