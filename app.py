@@ -15,7 +15,7 @@ connect(host=os.getenv("MONGO_URI"))
 @api.route("/AddQ")
 class AddQuotes(Resource):
     def post(self):
-        """Post req to add details in Database"""
+        """POST req to add details in Database"""
         record = json.loads(request.data)
         try:
             if len(record) != 0:
@@ -26,6 +26,19 @@ class AddQuotes(Resource):
                 return jsonify({"Msg": "Fields are empty"}, 201)
         except Exception as ex:
             return jsonify({"Msg": ex}, 404)
+
+
+@api.route("/<string:qid>/UpdateQ")
+class UpdateQuotes(Resource):
+    def put(self, qid: str):
+        """PUT req to update any records in database or particular objectID"""
+        try:
+            q = Quotes.objects(id=qid).first()
+            record = json.loads(request.data)
+            q.modify(title=record["title"], author=record["author"])
+            return jsonify({"Msg": "Fields are updated"})
+        except Exception as ex:
+            return jsonify({"Msg": ex})
 
 
 if __name__ == "__main__":
