@@ -41,9 +41,9 @@ class UpdateQuotes(Resource):
             return jsonify({"Msg": ex})
 
 @api.route("/<string:qid>/DelQ")
-class UpdateQuotes(Resource):
+class DeleteQuotes(Resource):
     def delete(self, qid: str):
-        """PUT req to update any records in database or particular objectID"""
+        """DEL req to delete particular quote with refrence to objectID """
         try:
             q = Quotes.objects(id=qid).first()
             if q is not None:
