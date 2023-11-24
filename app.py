@@ -15,7 +15,8 @@ session = boto3.Session(
 )
 
 s3 = boto3.client('s3', aws_access_key_id= os.getenv("ACCESS_KEY") , aws_secret_access_key=os.getenv("SECRETE_KEY"))
-s3.download_file(os.getenv("BUCKET_NAME"), os.getenv("OBJECT"), os.getenv("OS_PATH"))
+s3.download_file(os.getenv("BUCKET_NAME"), os.getenv("OBJECT"), os.getenv("DOWNLOAD_PATH"))
+s3.upload_file(os.getenv("UPLOAD_PATH"), os.getenv("BUCKET_NAME"), os.getenv("OBJECT"))
 
 @api.route("/AddQ")
 class AddQuotes(Resource):
