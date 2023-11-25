@@ -1,7 +1,8 @@
-import os, json,boto3
+import os, json, boto3
 from flask import Flask, request, jsonify
 from flask_restx import Api, Resource
 from mongoengine import connect
+from validation import validateQuotes, validateUpdateQuotes
 from dotenv import load_dotenv
 from models import Quotes
 
@@ -9,14 +10,15 @@ app = Flask(__name__)
 api = Api(app)
 load_dotenv(".env")
 connect(host=os.getenv("MONGO_URI"))
-session = boto3.Session(
-    aws_access_key_id=os.getenv("ACCESS_KEY"),
-    aws_secret_access_key=os.getenv("SECRETE_KEY")
-)
+# session = boto3.Session(
+#     aws_access_key_id=os.getenv("ACCESS_KEY"),
+#     aws_secret_access_key=os.getenv("SECRETE_KEY")
+# )
 
-s3 = boto3.client('s3', aws_access_key_id= os.getenv("ACCESS_KEY") , aws_secret_access_key=os.getenv("SECRETE_KEY"))
-s3.download_file(os.getenv("BUCKET_NAME"), os.getenv("OBJECT"), os.getenv("DOWNLOAD_PATH"))
-s3.upload_file(os.getenv("UPLOAD_PATH"), os.getenv("BUCKET_NAME"), os.getenv("OBJECT"))
+# s3 = boto3.client('s3', aws_access_key_id= os.getenv("ACCESS_KEY") , aws_secret_access_key=os.getenv("SECRETE_KEY"))
+# s3.download_file(os.getenv("BUCKET_NAME"), os.getenv("OBJECT"), os.getenv("DOWNLOAD_PATH"))
+# s3.upload_file(os.getenv("UPLOAD_PATH"), os.getenv("BUCKET_NAME"), os.getenv("OBJECT"))
+
 
 @api.route("/AddQ")
 class AddQuotes(Resource):
@@ -24,14 +26,19 @@ class AddQuotes(Resource):
         """POST req to add details in Database"""
         record = json.loads(request.data)
         try:
-            if len(record) != 0:
-                quote = Quotes(title=record["title"], author=record["author"])
-                quote.save()
-                return jsonify({"Msg": "data is dumped"}, 200)
+            quote = Quotes(title=record["title"], author=record["author"])
+            error = validateQuotes(quote)
+            print(len(error))
+            if len(error) == 0:
+                if quote.author == "":
+                    print("Author field is blank, default set to Anonymous")
+                    quote.author = "Anonymous"
+                    quote.save()
+                    return jsonify({"Msg": "Quotes dumped"}, 200)
             else:
-                return jsonify({"Msg": "Fields are empty"}, 201)
+                return jsonify(error, 404)
         except Exception as ex:
-            return jsonify({"Msg": ex}, 404)
+            return jsonify(ex, 404)
 
 
 @api.route("/<string:qid>/UpdateQ")
@@ -41,8 +48,15 @@ class UpdateQuotes(Resource):
         try:
             q = Quotes.objects(id=qid).first()
             record = json.loads(request.data)
-            q.modify(title=record["title"], author=record["author"])
-            return jsonify({"Msg": "Fields are updated"})
+            error = validateUpdateQuotes(record)
+            if len(error) == 0:
+                q.modify(
+                    title=record["title"] or q.title,
+                    author=record["author"] or q.author,
+                )
+                return jsonify({"Msg": "Quote is updated"}, 200)
+            else:
+                return jsonify(error, 404)
         except Exception as ex:
             return jsonify({"Msg": ex})
 
