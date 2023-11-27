@@ -1,11 +1,11 @@
+from logging.config import dictConfig
 import os, json, boto3
 from flask import Flask, request, jsonify
 from flask_restx import Api, Resource
 from mongoengine import connect
-from validation import validateQuotes, validateUpdateQuotes
 from dotenv import load_dotenv
+from validation import validateQuotes, validateUpdateQuotes
 from models import Quotes
-from logging.config import dictConfig
 
 dictConfig(
     {
@@ -21,13 +21,20 @@ dictConfig(
                 "stream": "ext://sys.stdout",
                 "formatter": "default",
             },
-            "file": {
-                "class": "logging.FileHandler",
+            # "file": {
+            #     "class": "logging.FileHandler",
+            #     "filename": "flask.log",
+            #     "formatter": "default",
+            # },
+            "size-rotate": {
+                "class": "logging.handlers.RotatingFileHandler",
                 "filename": "flask.log",
+                "maxBytes": 1000000,
+                "backupCount": 5,
                 "formatter": "default",
             },
         },
-        "root": {"level": "DEBUG", "handlers": ["console", "file"]},
+        "root": {"level": "DEBUG", "handlers": ["console", "size-rotate"]},
     }
 )
 
@@ -50,19 +57,33 @@ class AddQuotes(Resource):
     def post(self):
         """POST req to add details in Database"""
         record = json.loads(request.data)
+        app.logger.info(
+            "User inputs >>>  Title : %s, Author: %s ",
+            record["title"],
+            record["author"],
+        )
         try:
             quote = Quotes(title=record["title"], author=record["author"])
-            app.logger.info("hello world")
+            app.logger.info("Validating JSON received data")
             error = validateQuotes(quote)
             if len(error) == 0:
-                if quote.author == "":  
-                    print("Author field is blank, default set to Anonymous")
+                if quote.author == "":
+                    app.logger.warning(
+                        "Author field is blank, default set to Anonymous"
+                    )
                     quote.author = "Anonymous"
-                    quote.save()
-                    return jsonify({"Msg": "Quotes dumped"}, 200)
+                app.logger.info(
+                    " Saving data in DB >>> Title : %s,  Author : %s",
+                    quote.title,
+                    quote.author,
+                )
+                quote.save()
+                return jsonify({"Msg": "Quotes dumped"}, 200)
             else:
+                app.logger.error("%s", error)
                 return jsonify(error, 404)
         except Exception as ex:
+            app.logger.exception("%s", ex)
             return jsonify(ex, 404)
 
 
@@ -71,18 +92,35 @@ class UpdateQuotes(Resource):
     def put(self, qid: str):
         """PUT req to update any records in database or particular objectID"""
         try:
-            q = Quotes.objects(id=qid).first()
+            quote = Quotes.objects(id=qid).first()
+            app.logger.info("Quote for ObjectID : %s, is %s", qid, quote)
             record = json.loads(request.data)
+            app.logger.info(
+                "User inputs >>> Title : %s and Author : %s",
+                record["title"],
+                record["author"],
+            )
+            app.logger.info("Validating JSON data")
             error = validateUpdateQuotes(record)
             if len(error) == 0:
-                q.modify(
-                    title=record["title"] or q.title,
-                    author=record["author"] or q.author,
+                quote.modify(
+                    title=record["title"] or quote.title,
+                    author=record["author"] or quote.author,
+                )
+                app.logger.warning(
+                    "Note : The if any of the fields are not udpated with new data, DB would be saved with old data"
+                )
+                app.logger.info(
+                    "New updated fields are %s , %s",
+                    record["title"] or quote.title,
+                    record["author"] or quote.author,
                 )
                 return jsonify({"Msg": "Quote is updated"}, 200)
             else:
+                app.logger.error("%s", error)
                 return jsonify(error, 404)
         except Exception as ex:
+            app.logger.exception("%s", ex)
             return jsonify({"Msg": ex})
 
 
@@ -91,13 +129,17 @@ class DeleteQuotes(Resource):
     def delete(self, qid: str):
         """DEL req to delete particular quote with refrence to objectID"""
         try:
-            q = Quotes.objects(id=qid).first()
-            if q is not None:
-                q.delete()
+            quote = Quotes.objects(id=qid).first()
+            app.logger.info("Quote for ObjectID : %s, is %s", qid, quote)
+            if quote is not None:
+                quote.delete()
+                app.logger.info("Quote for ObjectID : %s, is deleted", qid)
                 return jsonify({"Msg": f"Quote with {qid} deleted"})
             else:
+                app.logger.warning("No quote found with objectId : %s in database", qid)
                 return jsonify({"Msg": f"No quote with {qid} to delete"})
         except Exception as ex:
+            app.logger.exception("%s", ex)
             return jsonify({"Msg": ex})
 
 
