@@ -5,6 +5,31 @@ from mongoengine import connect
 from validation import validateQuotes, validateUpdateQuotes
 from dotenv import load_dotenv
 from models import Quotes
+from logging.config import dictConfig
+
+dictConfig(
+    {
+        "version": 1,
+        "formatters": {
+            "default": {
+                "format": "[%(asctime)s] %(levelname)s in %(module)s: %(message)s",
+            }
+        },
+        "handlers": {
+            "console": {
+                "class": "logging.StreamHandler",
+                "stream": "ext://sys.stdout",
+                "formatter": "default",
+            },
+            "file": {
+                "class": "logging.FileHandler",
+                "filename": "flask.log",
+                "formatter": "default",
+            },
+        },
+        "root": {"level": "DEBUG", "handlers": ["console", "file"]},
+    }
+)
 
 app = Flask(__name__)
 api = Api(app)
@@ -27,10 +52,10 @@ class AddQuotes(Resource):
         record = json.loads(request.data)
         try:
             quote = Quotes(title=record["title"], author=record["author"])
+            app.logger.info("hello world")
             error = validateQuotes(quote)
-            print(len(error))
             if len(error) == 0:
-                if quote.author == "":
+                if quote.author == "":  
                     print("Author field is blank, default set to Anonymous")
                     quote.author = "Anonymous"
                     quote.save()
