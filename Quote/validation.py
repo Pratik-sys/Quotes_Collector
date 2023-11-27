@@ -1,5 +1,5 @@
 from flask import Flask
-from models import Quotes
+from Quote.models import Quotes
 
 app = Flask(__name__)
 

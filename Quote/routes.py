@@ -1,56 +1,11 @@
-from logging.config import dictConfig
-import os, json, boto3
-from flask import Flask, request, jsonify
-from flask_restx import Api, Resource
-from mongoengine import connect
-from dotenv import load_dotenv
-from Quote.validation import validateQuotes, validateUpdateQuotes
+import json
 from Quote.models import Quotes
-
-dictConfig(
-    {
-        "version": 1,
-        "formatters": {
-            "default": {
-                "format": "[%(asctime)s] %(levelname)s in %(module)s: %(message)s",
-            }
-        },
-        "handlers": {
-            "console": {
-                "class": "logging.StreamHandler",
-                "stream": "ext://sys.stdout",
-                "formatter": "default",
-            },
-            # "file": {
-            #     "class": "logging.FileHandler",
-            #     "filename": "flask.log",
-            #     "formatter": "default",
-            # },
-            "size-rotate": {
-                "class": "logging.handlers.RotatingFileHandler",
-                "filename": "flask.log",
-                "maxBytes": 1000000,
-                "backupCount": 5,
-                "formatter": "default",
-            },
-        },
-        "root": {"level": "DEBUG", "handlers": ["console", "size-rotate"]},
-    }
-)
-
+from Quote.extension import api
+from flask_restx import Resource
+from flask import request, jsonify
+from Quote.validation import validateQuotes, validateUpdateQuotes
+from flask import Flask
 app = Flask(__name__)
-api = Api(app)
-load_dotenv(".env")
-connect(host=os.getenv("MONGO_URI"))
-# session = boto3.Session(
-#     aws_access_key_id=os.getenv("ACCESS_KEY"),
-#     aws_secret_access_key=os.getenv("SECRETE_KEY")
-# )
-
-# s3 = boto3.client('s3', aws_access_key_id= os.getenv("ACCESS_KEY") , aws_secret_access_key=os.getenv("SECRETE_KEY"))
-# s3.download_file(os.getenv("BUCKET_NAME"), os.getenv("OBJECT"), os.getenv("DOWNLOAD_PATH"))
-# s3.upload_file(os.getenv("UPLOAD_PATH"), os.getenv("BUCKET_NAME"), os.getenv("OBJECT"))
-
 
 @api.route("/AddQ")
 class AddQuotes(Resource):
@@ -141,8 +96,3 @@ class DeleteQuotes(Resource):
         except Exception as ex:
             app.logger.exception("%s", ex)
             return jsonify({"Msg": ex})
-
-
-if __name__ == "__main__":
-    app.run(port=8080, debug=True)
-    # End-of-file (EOF)
