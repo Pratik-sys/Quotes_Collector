@@ -1,7 +1,6 @@
-from flask import Flask
 from Quote.models import Quotes
+from Quote.extension import app
 
-app = Flask(__name__)
 
 def validateQuotes(quote):
     errors = []

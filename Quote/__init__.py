@@ -5,6 +5,7 @@ from mongoengine import connect
 from dotenv import load_dotenv
 from logging.config import dictConfig
 from Quote.extension import api
+from Quote import routes
 
 def create_app():
     app = Flask(__name__)
@@ -37,4 +38,3 @@ def create_app():
     }
 )
     return app
-from Quote import routes

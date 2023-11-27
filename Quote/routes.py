@@ -1,11 +1,10 @@
 import json
 from Quote.models import Quotes
-from Quote.extension import api
+from Quote.extension import api, app
 from flask_restx import Resource
 from flask import request, jsonify
 from Quote.validation import validateQuotes, validateUpdateQuotes
 from flask import Flask
-app = Flask(__name__)
 
 @api.route("/AddQ")
 class AddQuotes(Resource):
