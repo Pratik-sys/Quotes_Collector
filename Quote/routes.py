@@ -1,12 +1,12 @@
 import json
-from Quote.models import Quotes
-from Quote.extension import api, app
-from flask_restx import Resource
 from flask import request, jsonify
+from flask_restx import Resource, Namespace
+from Quote.models import Quotes
+from Quote.extension import ns, app
 from Quote.validation import validateQuotes, validateUpdateQuotes
-from flask import Flask
 
-@api.route("/GetQ")
+ns = Namespace("api")
+@ns.route("/GetQ")
 class GetAllQuotes(Resource):
     def get(self):
         quote = Quotes.objects.to_json()
@@ -17,7 +17,7 @@ class GetAllQuotes(Resource):
             app.logger.warning("No quotes to display")
             return jsonify({"Msg": "No quotes to display"})
 
-@api.route("/AddQ")
+@ns.route("/AddQ")
 class AddQuotes(Resource):
     def post(self):
         """POST req to add details in Database"""
@@ -52,7 +52,7 @@ class AddQuotes(Resource):
             return jsonify(ex, 404)
 
 
-@api.route("/<string:qid>/UpdateQ")
+@ns.route("/<string:qid>/UpdateQ")
 class UpdateQuotes(Resource):
     def put(self, qid: str):
         """PUT req to update any records in database or particular objectID"""
@@ -89,7 +89,7 @@ class UpdateQuotes(Resource):
             return jsonify({"Msg": ex})
 
 
-@api.route("/<string:qid>/DelQ")
+@ns.route("/<string:qid>/DelQ")
 class DeleteQuotes(Resource):
     def delete(self, qid: str):
         """DEL req to delete particular quote with refrence to objectID"""
@@ -106,3 +106,4 @@ class DeleteQuotes(Resource):
         except Exception as ex:
             app.logger.exception("%s", ex)
             return jsonify({"Msg": ex})
+        # End-of-file (EOF)
