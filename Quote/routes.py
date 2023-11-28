@@ -6,6 +6,17 @@ from flask import request, jsonify
 from Quote.validation import validateQuotes, validateUpdateQuotes
 from flask import Flask
 
+@api.route("/GetQ")
+class GetAllQuotes(Resource):
+    def get(self):
+        quote = Quotes.objects.to_json()
+        if len(quote) > 0 :
+            app.logger.info(quote)
+            return jsonify(quote, 200)
+        else:
+            app.logger.warning("No quotes to display")
+            return jsonify({"Msg": "No quotes to display"})
+
 @api.route("/AddQ")
 class AddQuotes(Resource):
     def post(self):
