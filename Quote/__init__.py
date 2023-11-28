@@ -7,7 +7,7 @@ from Quote.routes import ns
 
 
 def create_app():
-    """function will crete the application instnce at the start the server run and will initialise all the config defined under it"""
+    """function will init flask app instance at the start the server,and all the config defined under it"""
     api._init_app(app)
     load_dotenv(".env")
     connect(host=os.getenv("MONGO_URI"))

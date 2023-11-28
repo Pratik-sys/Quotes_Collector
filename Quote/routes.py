@@ -2,12 +2,13 @@ import json
 from flask import request, jsonify
 from flask_restx import Resource, Namespace
 from Quote.models import Quotes
-from Quote.extension import ns, app
-from Quote.validation import validateQuotes, validateUpdateQuotes
+from Quote.extension import app
+from Quote.validation import validate_quotes, validate_update_quotes
 
 ns = Namespace("api")
 @ns.route("/GetQ")
 class GetAllQuotes(Resource):
+    """Endpoint to fetch all the records from the database"""
     def get(self):
         quote = Quotes.objects.to_json()
         if len(quote) > 0 :
@@ -19,8 +20,8 @@ class GetAllQuotes(Resource):
 
 @ns.route("/AddQ")
 class AddQuotes(Resource):
+    """Endpoint with POST method to insert documnet in collections"""
     def post(self):
-        """POST req to add details in Database"""
         record = json.loads(request.data)
         app.logger.info(
             "User inputs >>>  Title : %s, Author: %s ",
@@ -30,7 +31,7 @@ class AddQuotes(Resource):
         try:
             quote = Quotes(title=record["title"], author=record["author"])
             app.logger.info("Validating JSON")
-            error = validateQuotes(quote)
+            error = validate_quotes(quote)
             if len(error) == 0:
                 if quote.author == "":
                     app.logger.warning(
@@ -54,8 +55,8 @@ class AddQuotes(Resource):
 
 @ns.route("/<string:qid>/UpdateQ")
 class UpdateQuotes(Resource):
+    """Endpoint With PUT method modfiy/update the exixting record with ObjectId"""
     def put(self, qid: str):
-        """PUT req to update any records in database or particular objectID"""
         try:
             quote = Quotes.objects(id=qid).first()
             app.logger.info("ObjectId for the requested quote is >>> %s", qid)
@@ -66,7 +67,7 @@ class UpdateQuotes(Resource):
                 record["author"],
             )
             app.logger.info("Validating JSON")
-            error = validateUpdateQuotes(record)
+            error = validate_update_quotes(record)
             if len(error) == 0:
                 quote.modify(
                     title=record["title"] or quote.title,
@@ -91,8 +92,8 @@ class UpdateQuotes(Resource):
 
 @ns.route("/<string:qid>/DelQ")
 class DeleteQuotes(Resource):
+    """Endpoint with DELETE method to remove from datbase with reference to onjectID"""
     def delete(self, qid: str):
-        """DEL req to delete particular quote with refrence to objectID"""
         try:
             quote = Quotes.objects(id=qid).first()
             app.logger.info("ObjectId for the requested quote is >>> %s", qid)
