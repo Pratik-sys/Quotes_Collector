@@ -3,7 +3,7 @@ from mongoengine import StringField, Document, DateField
 
 class Quotes(Document):
     """Models to define Schema in Monogo"""
-    title = StringField()
-    author = StringField()
-    date = DateField(default=datetime.utcnow)
+    Title = StringField()
+    Author = StringField()
+    Date = DateField(default=datetime.utcnow)
     # End-of-file (EOF)
