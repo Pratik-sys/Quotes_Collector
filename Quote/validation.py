@@ -1,11 +1,10 @@
 from Quote.models import Quotes
 from Quote.extension import app
 
-
 def validate_quotes(quote):
     """function will validate the data coming from JSON"""
     errors = []
-    if quote.title == "":
+    if quote.Title == "":
         errors.append("Title field cannot be empty")
         app.logger.warning("Title field is empty, return the error array")
     return errors
