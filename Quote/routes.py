@@ -1,26 +1,29 @@
 import json
-from flask import request, jsonify
-from flask_restx import Resource, Namespace
+from flask import Flask, request, jsonify
+from flask_restx import Resource
 from Quote.models import Quotes
-from Quote.extension import app
+from Quote.extension import api
 from Quote.validation import validate_quotes, validate_update_quotes
 
-ns = Namespace("api")
-@ns.route("/GetQ")
+app = Flask(__name__)
+@api.route("/GetQ")
 class GetAllQuotes(Resource):
     """Endpoint to fetch all the records from the database"""
+
     def get(self):
         quote = Quotes.objects.to_json()
-        if len(quote) > 0 :
+        if len(quote) > 0:
             app.logger.info(quote)
             return jsonify(quote, 200)
         else:
             app.logger.warning("No quotes to display")
             return jsonify({"Msg": "No quotes to display"})
 
-@ns.route("/AddQ")
+
+@api.route("/AddQ")
 class AddQuotes(Resource):
     """Endpoint with POST method to insert documnet in collections"""
+
     def post(self):
         record = json.loads(request.data)
         app.logger.info(
@@ -29,19 +32,19 @@ class AddQuotes(Resource):
             record["author"],
         )
         try:
-            quote = Quotes(title=record["title"], author=record["author"])
+            quote = Quotes(Title=record["title"], Author=record["author"])
             app.logger.info("Validating JSON")
             error = validate_quotes(quote)
             if len(error) == 0:
-                if quote.author == "":
+                if quote.Author == "":
                     app.logger.warning(
                         "Author field is blank, default set to Anonymous"
                     )
-                    quote.author = "Anonymous"
+                    quote.Author = "Anonymous"
                 app.logger.info(
                     " Saving data in DB >>> Title : %s,  Author : %s",
-                    quote.title,
-                    quote.author,
+                    quote.Title,
+                    quote.Author,
                 )
                 quote.save()
                 return jsonify({"Msg": "Quote added"}, 200)
@@ -53,9 +56,10 @@ class AddQuotes(Resource):
             return jsonify(ex, 404)
 
 
-@ns.route("/<string:qid>/UpdateQ")
+@api.route("/<string:qid>/UpdateQ")
 class UpdateQuotes(Resource):
     """Endpoint With PUT method modfiy/update the exixting record with ObjectId"""
+
     def put(self, qid: str):
         try:
             quote = Quotes.objects(id=qid).first()
@@ -70,16 +74,16 @@ class UpdateQuotes(Resource):
             error = validate_update_quotes(record)
             if len(error) == 0:
                 quote.modify(
-                    title=record["title"] or quote.title,
-                    author=record["author"] or quote.author,
+                    Title=record["title"] or quote.Title,
+                    Author=record["author"] or quote.Author,
                 )
                 app.logger.warning(
                     "Note : if any of the fields are not udpated with new data, DB would be saved with old data"
                 )
                 app.logger.info(
                     "New updated fields are %s , %s",
-                    record["title"] or quote.title,
-                    record["author"] or quote.author,
+                    record["title"] or quote.Title,
+                    record["author"] or quote.Author,
                 )
                 return jsonify({"Msg": "Quote is updated"}, 200)
             else:
@@ -90,9 +94,10 @@ class UpdateQuotes(Resource):
             return jsonify({"Msg": ex})
 
 
-@ns.route("/<string:qid>/DelQ")
+@api.route("/<string:qid>/DelQ")
 class DeleteQuotes(Resource):
     """Endpoint with DELETE method to remove from datbase with reference to onjectID"""
+
     def delete(self, qid: str):
         try:
             quote = Quotes.objects(id=qid).first()

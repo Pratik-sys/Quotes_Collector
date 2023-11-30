@@ -1,5 +1,6 @@
-from Quote.models import Quotes
-from Quote.extension import app
+from flask import Flask
+
+app = Flask(__name__)
 
 def validate_quotes(quote):
     """function will validate the data coming from JSON"""
@@ -9,6 +10,7 @@ def validate_quotes(quote):
         app.logger.warning("Title field is empty, return the error array")
     return errors
 
+
 def validate_update_quotes(record):
     """function will check for the fileds while updating in database"""
     errors = []
@@ -16,4 +18,3 @@ def validate_update_quotes(record):
         errors.append("Cannot update title as blank field")
         app.logger.warning("Cannot update title as blank field, retur the error array")
     return errors
-

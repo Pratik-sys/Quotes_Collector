@@ -1,17 +1,18 @@
 import os
+from flask import Flask
 from logging.config import dictConfig
 from mongoengine import connect
 from dotenv import load_dotenv
-from Quote.extension import api, app
-from Quote.routes import ns
+from Quote.extension import api
+from Quote import routes
 
 
 def create_app():
     """function will init flask app instance at the start the server,and all the config defined under it"""
+    app = Flask(__name__)
     api._init_app(app)
     load_dotenv(".env")
     connect(host=os.getenv("MONGO_URI"))
-    api.add_namespace(ns)
     dictConfig(
         {
             "version": 1,
