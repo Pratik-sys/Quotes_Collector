@@ -2,6 +2,13 @@ from Quote.models import Quotes
 import responses
 
 
+def test_get_quotes(client, app):
+    client.get("/GetQ")
+
+    with app.app_context():
+        q = Quotes.objects.to_json()
+        assert len(q) != 0
+
 def test_add_quotes(client, app):
     client.get("/AddQ")
 
