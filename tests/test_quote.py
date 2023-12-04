@@ -10,8 +10,9 @@ def test_get_quotes(client, app):
         assert len(q) != 0
 
 def test_add_quotes(client, app):
-    client.get("/AddQ")
-
+    client.post("/AddQ")
+    data = {"Title":"Testing test cases", "Author" : "pytest"}
+    
     with app.app_context(): 
         q = Quotes(Title="Helloji", Author="Pratik")
         q.save()
