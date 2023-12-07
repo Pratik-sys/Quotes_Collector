@@ -12,7 +12,7 @@ class GetAllQuotes(Resource):
 
     def get(self):
         quote = Quotes.objects.to_json()
-        if len(quote) > 0:
+        if len(quote) > 2:
             app.logger.info(quote)
             return jsonify(quote, 200)
         else:
