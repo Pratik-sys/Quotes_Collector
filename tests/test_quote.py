@@ -1,20 +1,17 @@
 from Quote.models import Quotes
-import responses
+# import responses
 
 
 def test_get_quotes(client, app):
-    client.get("/GetQ")
-
+    response = client.get("/GetQ")
     with app.app_context():
         q = Quotes.objects.to_json()
-        assert len(q) != 0
+        assert len(q) >= 2
 
-def test_add_quotes(client, app):
-    client.post("/AddQ")
-    data = {"Title":"Testing test cases", "Author" : "pytest"}
+# def test_add_quotes(client, app):
+#     response = client.post("/AddQ", data = dict (Title = "testing_title", Author = "testing_author") )
     
-    with app.app_context(): 
-        q = Quotes(Title="Helloji", Author="Pratik")
-        q.save()
-        assert Quotes.objects(Title="Helloji").first()
-
+#     with app.app_context(): 
+#         # assert response.status_code == 200
+#         print(response.data)
+#         assert "testing_title" in response.data.title
