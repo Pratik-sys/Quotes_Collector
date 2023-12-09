@@ -1,5 +1,8 @@
 import os, boto3, json
-from Quote.extension import app
+
+from flask import Flask
+
+app = Flask(__name__)
 
 session = boto3.Session(
     aws_access_key_id=os.getenv("ACCESS_KEY"),
