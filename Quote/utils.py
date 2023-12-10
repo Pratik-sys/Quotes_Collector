@@ -17,7 +17,7 @@ def upload_to_s3():
     """if .env file is present in the root location then upload it to S3 bucket"""
     try:
         if os.path.exists(os.path.abspath(".env")):
-            app.looger.info("File is alrady present in %s lcoation", os.path.abspath(".env"))
+            app.logger.info("File is alrady present in %s lcoation", os.path.abspath(".env"))
             s3.upload_file(os.getenv("UPLOAD_PATH"), os.getenv("BUCKET_NAME"), os.getenv("OBJECT"))
             return json.dumps({"Msg" : "File is uploaded"})
         else:
@@ -30,12 +30,12 @@ def download_from_s3():
     """if .env file is not present in the download the file from S3 bucket"""
     try:
         if os.path.exists(os.path.abspath(".env")):
-            app.looger.info("File is alrady present in %s lcoation", os.path.abspath(".env"))
+            app.logger.info("File is alrady present in %s lcoation", os.path.abspath(".env"))
             return json.dumps({"Msg" : "File lready exist"})
         else:
             app.logger.error("Downloading from S3 bucket to root lcoation")
             s3.download_file(os.getenv("BUCKET_NAME"), os.getenv("OBJECT"), os.getenv("DOWNLOAD_PATH"))
             return json.dumps({"Msg" : "File downloaded"})
-    except Exception as ex:
+    except FileNotFoundError as ex:
         return json.dumps(ex)
     
