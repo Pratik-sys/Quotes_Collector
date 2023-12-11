@@ -112,4 +112,3 @@ class DeleteQuotes(Resource):
         except Exception as ex:
             app.logger.exception("%s", ex)
             return jsonify({"Msg": ex})
-        # End-of-file (EOF)

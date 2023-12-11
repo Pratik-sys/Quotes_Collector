@@ -1,12 +1,13 @@
 import os
-from flask import Flask
 from logging.config import dictConfig
+from flask import Flask
 from dotenv import load_dotenv
 from Quote.extension import api, db
 from Quote import routes
 
 def create_app():
-    """function will init flask app instance at the start the server,and all the config defined under it"""
+    """function will init flask app instance at the start the 
+    server,and all the config defined under it"""
     app = Flask(__name__)
     api._init_app(app)
     load_dotenv(".env")
