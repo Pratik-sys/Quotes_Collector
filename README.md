@@ -7,13 +7,13 @@ An endpoint with curated collections of random quotes
 
 TODO
 
-[ ] Write all test cases
+[ X ] Write all test cases
 
 [ ] Documnet all the API's 
 
-[ ] Code formating
+[ X ] Code formating
 
 [ ] Deploy API
 
-[ ] End to end testing
+[ X ] End to end testing
     
