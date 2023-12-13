@@ -47,7 +47,7 @@ class AddQuotes(Resource):
                     quote.Author,
                 )
                 quote.save()
-                return jsonify({"Msg": "Quote added"}, 200)
+                return jsonify({"Msg": "Quote added"}, 201)
             else:
                 app.logger.error("%s", error)
                 return jsonify(error, 404)
